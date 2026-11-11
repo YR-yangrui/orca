@@ -4,6 +4,10 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { useSidebarResize } from '@/hooks/useSidebarResize'
 import SidebarHeader from './SidebarHeader'
 import SidebarNav from './SidebarNav'
+import SessionGroupsSidebar, {
+  SessionGroupModeSwitch
+} from '@/features/session-groups/SessionGroupsSidebar'
+import { useSessionGroupsEnabled } from '@/features/session-groups/session-group-state'
 import { setSidebarLiveWidth } from './sidebar-live-width'
 import SetupScriptPromptCard from './SetupScriptPromptCard'
 import WorktreeList from './worktree-list/listing/WorktreeList'
@@ -69,6 +73,7 @@ function Sidebar({
   const startupWorktreeRefreshCompleted = useAppStore((s) => s.startupWorktreeRefreshCompleted)
   const settings = useAppStore((s) => s.settings)
   const sidebarBody = useAppStore((s) => s.sidebarBody ?? 'workspaces')
+  const sessionGroups = useSessionGroupsEnabled()
   const showAgentDashboard = settings?.experimentalAgentDashboardPopout === true
   const agentDashboardDrawerOpen = useAppStore((s) => s.agentDashboardDrawerOpen)
   const setAgentDashboardDrawerOpen = useAppStore((s) => s.setAgentDashboardDrawerOpen)
@@ -181,12 +186,15 @@ function Sidebar({
           {sidebarOpen && (
             <>
               <SidebarNav />
-              <SidebarHeader
-                activityBadgeTarget={setAgentBadgeTarget}
-                onWorkspaceBoardMenuOpenChange={setWorkspaceBoardMenuOpen}
-                activityOptionsTarget={setAgentOptionsTarget}
-                projectsCollapseTarget={setProjectsCollapseTarget}
-              />
+              <SessionGroupModeSwitch />
+              {!sessionGroups && (
+                <SidebarHeader
+                  activityBadgeTarget={setAgentBadgeTarget}
+                  onWorkspaceBoardMenuOpenChange={setWorkspaceBoardMenuOpen}
+                  activityOptionsTarget={setAgentOptionsTarget}
+                  projectsCollapseTarget={setProjectsCollapseTarget}
+                />
+              )}
               <SeveredTerminalDaemonBanner />
               <StalledTerminalDaemonBanner />
               <React.Suspense
@@ -194,7 +202,7 @@ function Sidebar({
               >
                 <ActivityThreadCollapseContext.Provider value={agentsCollapseState}>
                   <SidebarAgentsList
-                    active={sidebarBody === 'agents'}
+                    active={!sessionGroups && sidebarBody === 'agents'}
                     readFilter={agentReadFilter}
                     setReadFilter={setAgentReadFilter}
                     groupBy={agentGroupBy}
@@ -207,7 +215,8 @@ function Sidebar({
                   />
                 </ActivityThreadCollapseContext.Provider>
               </React.Suspense>
-              {sidebarBody !== 'agents' && (
+              {sessionGroups && <SessionGroupsSidebar />}
+              {!sessionGroups && sidebarBody !== 'agents' && (
                 <>
                   <LocalGitToolchainScanBanner />
                   <StartupWorktreeRefreshStatus />

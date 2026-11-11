@@ -23,6 +23,10 @@ import { getWorktreeGitIdentityDisplay } from '../../../../shared/worktree/git-i
 import { isFolderRepo } from '../../../../shared/repo-kind'
 import { SourceControlPanel } from './source-control/panel/panel'
 import {
+  isSessionGroupResolution,
+  withSessionGroupSourceControl
+} from '@/features/session-groups/session-group-source-control'
+import {
   SourceControlScopeProvider,
   type SourceControlScope
 } from './source-control/panel/worktree-scope'
@@ -222,13 +226,13 @@ export default function FolderWorkspaceSourceControlPanel() {
   )
   const owners = useMemo(
     () =>
-      resolution.owners.flatMap((owner) => {
+      withSessionGroupSourceControl(resolution, repos, worktreesByRepo).owners.flatMap((owner) => {
         const repo = resolveReviewRepository(repos, owner.worktree)
         return repo && resolution.folderWorkspace
           ? [{ ...owner, repo, placementWorkspaceId: `folder:${resolution.folderWorkspace.id}` }]
           : []
       }),
-    [resolution, repos]
+    [resolution, repos, worktreesByRepo]
   )
   const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null)
   const [refreshers] = useState(() => new Set<() => void>())
@@ -244,11 +248,13 @@ export default function FolderWorkspaceSourceControlPanel() {
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-medium">{resolution.folderWorkspace?.name}</div>
           <div className="mt-1 text-xs text-muted-foreground">
-            {t(
-              'auto.components.rightSidebar.FolderWorkspaceWorktreesPanel.attachedCount',
-              '{{count}} attached worktrees',
-              { count: owners.length, defaultValue_one: '{{count}} attached worktree' }
-            )}
+            {isSessionGroupResolution(resolution)
+              ? resolution.folderWorkspace?.folderPath
+              : t(
+                  'auto.components.rightSidebar.FolderWorkspaceWorktreesPanel.attachedCount',
+                  '{{count}} attached worktrees',
+                  { count: owners.length, defaultValue_one: '{{count}} attached worktree' }
+                )}
           </div>
         </div>
         <Tooltip>

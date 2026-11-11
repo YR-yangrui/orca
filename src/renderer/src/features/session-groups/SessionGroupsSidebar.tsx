@@ -93,14 +93,11 @@ export default function SessionGroupsSidebar() {
     }
     setBusy(true)
     setError('')
-    try {
-      await createSessionGroup(repo, name)
-      setDialog(null)
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    } finally {
-      setBusy(false)
-    }
+    // Promise finalization keeps the busy state correct without a React compiler bailout.
+    await createSessionGroup(repo, name)
+      .then(() => setDialog(null))
+      .catch((cause) => setError(cause instanceof Error ? cause.message : String(cause)))
+      .finally(() => setBusy(false))
   }
   return (
     <>

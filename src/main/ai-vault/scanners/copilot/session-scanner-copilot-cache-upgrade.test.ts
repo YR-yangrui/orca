@@ -23,6 +23,7 @@ import {
 } from '../../parse-cache/session-parse-cache-store'
 import { parseCopilotSessionFile } from './session-scanner-copilot-parser'
 import { resetTranscriptConsumersForTests } from '../../transcripts/session-transcript-consumers'
+import { sessionParseCacheDatabasePath } from '../../parse-cache/session-parse-cache-version-files'
 
 let root: string | undefined
 let store: SessionSearchStore | undefined
@@ -80,7 +81,7 @@ it('repairs unchanged Copilot metadata and search messages cached before the par
       platform: 'linux'
     })
   }
-  const parsePath = join(root, 'session-parse-cache.sqlite')
+  const parsePath = sessionParseCacheDatabasePath(root)
   const parseCache = new SessionParseCacheDatabase(parsePath)
   const entry: PersistedSessionParseCacheEntry = {
     mtimeMs: candidate.file.mtimeMs,

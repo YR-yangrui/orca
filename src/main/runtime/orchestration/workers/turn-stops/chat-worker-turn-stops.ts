@@ -1,6 +1,7 @@
 import type { AgentSessionStatusSummary } from '../../../../../shared/agent-session/agent-session-wire'
 import type { AgentSessionTurnCompletionEvent } from '../../../../../shared/agent-session/view/agent-session-turn-completion-wire'
 import { AGENT_DONE_QUIET_MS } from '../../../../../shared/agent-status/lifecycle/agent-transitions'
+import { exposeUtcTimestamp } from '../../db/utc-timestamp'
 import { chatWorkerDispatches } from './chat-worker-error-escalation'
 import {
   reportWorkerTurnStop,
@@ -109,7 +110,10 @@ export function chatWorkerTurnStopReporter(
                 stopKey: stop.stopKey,
                 reason: stop.reason,
                 lastOutput: status?.lastAssistantMessage,
-                turnStartedAt
+                // A session's first turn seen here began no earlier than its Dispatch.
+                turnStartedAt:
+                  turnStartedAt ??
+                  Date.parse(exposeUtcTimestamp(dispatch.created_at) ?? dispatch.created_at)
               },
               deps
             )

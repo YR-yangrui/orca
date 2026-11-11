@@ -329,6 +329,26 @@ describe('terminal worker turn stops', () => {
     expect(ctx.mail().map((m) => m.subject)).toEqual(['Worker stopped without reporting'])
   })
 
+  it('never mails a capability carried in why a worker went away', () => {
+    const ctx = setup()
+    const capability = 'dcap_0123456789abcdefghijKLMN'
+    reportWorkerTurnStop(
+      ctx.db,
+      { kind: 'local', dispatch: ctx.dispatch },
+      {
+        from: HANDLE,
+        reason: 'lost',
+        lastOutput: undefined,
+        cause: `it never started: refused ${capability}`,
+        leftover: `workspace ${capability}`
+      },
+      ctx.deps
+    )
+    const [mail] = ctx.mail()
+    expect(mail?.body).toContain('refused [dispatch capability redacted]')
+    expect(mail?.body).not.toContain(capability)
+  })
+
   it('stays quiet for the turn whose worker_done was rejected, not for later turns', () => {
     const ctx = setup()
     const writeToWorker = () => {

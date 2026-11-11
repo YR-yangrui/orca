@@ -28,6 +28,8 @@ export type WorkerTurnStop = {
   cause?: string
   /** What the worker left behind, such as the workspace of a start that failed. */
   leftover?: string
+  /** A start that never got a terminal has no output to read. */
+  neverStarted?: true
   /** How its going away settled the Dispatch; absent while the Dispatch stays open. */
   settled?: 'failed' | 'circuit_broken'
 }
@@ -60,12 +62,12 @@ function isWorkerGone(reason: WorkerTurnStopReason): boolean {
   return reason === 'exited' || reason === 'lost'
 }
 
-function nextStep(stop: WorkerTurnStop, dispatchId: string): string {
+function nextStep(stop: WorkerTurnStop, task: string, dispatchId: string): string {
   if (stop.settled === 'circuit_broken') {
     return 'Its Dispatch is closed as failed, and its task has failed too many times to be retried automatically. Tell the user.'
   }
   if (stop.settled === 'failed') {
-    return `Its Dispatch is closed as failed. Retry it with your Orca CLI's \`orchestration worker-start --retry-of ${dispatchId}\`, or tell the user.`
+    return `Its Dispatch is closed as failed. Retry it with your Orca CLI's \`orchestration worker-start --task ${task} --retry-of ${dispatchId}\` and the same placement and agent, or tell the user.`
   }
   return isWorkerGone(stop.reason)
     ? 'Stop the worker, then retry it or tell the user.'
@@ -74,20 +76,23 @@ function nextStep(stop: WorkerTurnStop, dispatchId: string): string {
 }
 
 function describeStop(stop: WorkerTurnStop, task: string, dispatchId: string): string {
+  // Agent prose and failure text can echo its injected capability; mail must never carry it.
+  const redact = (text: string | undefined) => text && replaceDispatchCapabilities(text).value
+  const cause = redact(stop.cause)
+  const leftover = redact(stop.leftover)
   const what =
     stop.reason === 'needs-input'
       ? `Worker ${stop.from} is stopped at a prompt that needs a person (approval or a question) while running task ${task}.`
       : stop.reason === 'exited'
-        ? `Worker ${stop.from} exited (${stop.cause ?? 'process ended'}) without sending worker_done for task ${task}.`
+        ? `Worker ${stop.from} exited (${cause ?? 'process ended'}) without sending worker_done for task ${task}.`
         : stop.reason === 'lost'
-          ? `Worker ${stop.from} is gone (${stop.cause ?? 'cause unknown'}) without sending worker_done for task ${task}.`
+          ? `Worker ${stop.from} is gone (${cause ?? 'cause unknown'}) without sending worker_done for task ${task}.`
           : `Worker ${stop.from} ended its turn ${stop.reason === 'errored' ? 'on an error ' : ''}without sending worker_done for task ${task}.`
-  // Agent prose can echo its injected capability; mail must never carry it.
-  const output = stop.lastOutput && replaceDispatchCapabilities(stop.lastOutput).value.trim()
+  const output = redact(stop.lastOutput)?.trim()
   return [
     what,
-    nextStep(stop, dispatchId),
-    ...(stop.leftover ? [`Left behind: ${stop.leftover}.`] : []),
+    nextStep(stop, task, dispatchId),
+    ...(leftover ? [`Left behind: ${leftover}.`] : []),
     ...(stop.reason === 'finished'
       ? [
           'If it is idle on purpose, leave it: its later idle turns are not reported until you write to it.'
@@ -101,7 +106,9 @@ function describeStop(stop: WorkerTurnStop, task: string, dispatchId: string): s
             : output
         ]
       : []),
-    `Full output: orchestration worker-read --dispatch ${dispatchId}`
+    ...(stop.neverStarted
+      ? []
+      : [`Full output: orchestration worker-read --dispatch ${dispatchId}`])
   ].join('\n')
 }
 

@@ -51,6 +51,7 @@ export function reportFailedWorkerStart(
       cause: `it never started: ${worker.last_error ?? 'its start failed'}`,
       lastOutput: undefined,
       leftover: describeLeftover(worker.residual_resources),
+      neverStarted: true,
       ...(settled ? { settled } : {})
     },
     { getDb: () => db, isWaitingForMail: () => false, notify }

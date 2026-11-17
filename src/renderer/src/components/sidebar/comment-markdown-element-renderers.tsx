@@ -2,7 +2,7 @@ import { GitHubBodyImageUrlsContext } from './comment-markdown-github-image-urls
 import React from 'react'
 import { isTrustedCompactImageSrc } from './comment-markdown-sanitize'
 import type { Components } from 'react-markdown'
-import { NATIVE_CHAT_FILE_HREF_PREFIX } from '../../../../shared/native-chat/native-chat-href-routing'
+import { NATIVE_CHAT_FILE_HREF_PREFIX } from '../../../../shared/native-chat/file-access/native-chat-href-routing'
 import {
   CommentMarkdownDocumentCode,
   CommentMarkdownDocumentPre
@@ -15,7 +15,7 @@ import {
 } from './comment-markdown-github-attachment-media'
 import { ExpandableMarkdownImage } from './MarkdownImageLightbox'
 import { MarkdownGitHubCallout } from '@/components/markdown-github-callout'
-import { readGitHubCalloutKind } from '../../../../shared/github/github-callouts'
+import { readGitHubCalloutKind } from '../../../../shared/github/markdown/github-callouts'
 
 export type CommentMarkdownLinkClickHandler = (
   event: React.MouseEvent<HTMLElement>,

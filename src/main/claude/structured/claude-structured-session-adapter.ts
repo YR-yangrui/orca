@@ -1,32 +1,32 @@
-import { dispatchClaudeCommand } from './claude-structured-command-dispatch'
-import { isKillDeliveredExitReceipt } from './claude-kill-delivered-exit-receipt'
+import { dispatchClaudeCommand } from './turns/claude-structured-command-dispatch'
+import { isKillDeliveredExitReceipt } from './lifecycle/claude-kill-delivered-exit-receipt'
+import { manageClaudeMcp } from './lifecycle/claude-structured-mcp'
 import { claudeAcquireFailure } from '../sdk-transport/claude-startup-failure'
-import { claudeStartPublication, openClaudeStart } from './claude-structured-start-ending'
+import { claudeStartPublication, openClaudeStart } from './startup/claude-structured-start-ending'
 import { AgentSessionStartEndings } from '../../native-chat/agent-session-wire/startup/structured-agent-session-start-failure'
 import type {
   StructuredAgentSessionAcquireInput,
   StructuredAgentSessionAdapter
 } from '../../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
-import { stopCurrentClaudeBackgroundTasks } from './claude-structured-control-actions'
+import { stopCurrentClaudeBackgroundTasks } from './turns/claude-structured-control-actions'
 import { claudeHeldSends, claudeHoldsDispatch } from './turns/claude-command-lifecycle'
 import {
   releaseClaudeAcquisition,
   type ClaudeReleaseRequest
-} from './claude-structured-acquisition-release'
-import { acquireClaudeSession } from './claude-structured-session-acquisition'
+} from './lifecycle/claude-structured-acquisition-release'
+import { acquireClaudeSession } from './lifecycle/claude-structured-session-acquisition'
 import { supportsClaudeStructuredLocation } from './launch/claude-structured-location-support'
 import * as claudeOptions from './launch/claude-structured-options'
 import { dispatchClaudeMessage } from './launch/claude-structured-message-options'
 import { readClaudeStructuredSessionOptions } from './launch/claude-structured-session-options'
-import { noteClaudeModelPick } from './claude-structured-execution-observations'
 import {
   ClaudeAcquisitionRegistry,
   type ClaudeSession,
   type ClaudeSessionExit,
-  type ClaudeStructuredSessionAdapterDeps,
-  type ClaudeStructuredSessionEvent
+  type ClaudeStructuredSessionAdapterDeps
 } from './claude-structured-session-state'
-import { closeAllClaudeSessions } from './claude-structured-session-close'
+import type { ClaudeStructuredSessionEvent } from './lifecycle/claude-structured-session-event'
+import { closeAllClaudeSessions } from './lifecycle/claude-structured-session-close'
 import { claudeStoppedRequestEndWait } from './turns/claude-request-end-wait'
 import {
   finishClaudeCloseAfterExit,
@@ -35,12 +35,12 @@ import {
   observeClaudeSessionExit,
   settleClaudeUnexpectedExit,
   type ClaudeExitLifecycle
-} from './claude-structured-session-exit-lifecycle'
+} from './lifecycle/claude-structured-session-exit-lifecycle'
 import { drainClaudeChildWork } from '../child-work/claude-child-work-evidence'
 import {
   deliverClaudeConnectionEvent,
   emitClaudeStructuredSessionEvent
-} from './claude-structured-event-delivery'
+} from './lifecycle/claude-structured-event-delivery'
 import {
   answerClaudeStructuredPrompt,
   cancelClaudeStructuredTurn,
@@ -51,11 +51,9 @@ import { claudePromptCancelRoute } from './journal/claude-structured-prompt-repl
 import { claudeForkForRewind } from '../transcripts/claude-rewind-fork'
 import { copyClaudeConversation } from '../transcripts/claude-conversation-copy'
 import { ClaudeConversationNaming } from '../conversation-naming/claude-conversation-naming'
-import { captureClaudeConversationTitleOwner } from './claude-conversation-title-owner'
 
 export class ClaudeStructuredSessionAdapter implements StructuredAgentSessionAdapter {
   private readonly sessions = new Map<string, ClaudeSession>()
-  captureConversationTitleOwner = captureClaudeConversationTitleOwner(this.sessions)
   private readonly acquisitions = new ClaudeAcquisitionRegistry()
   private readonly exits = new Map<string, ClaudeSessionExit>()
   private readonly settledExitErrors = new Map<string, Error>()
@@ -197,6 +195,8 @@ export class ClaudeStructuredSessionAdapter implements StructuredAgentSessionAda
     this.sessions.has(sessionId) ? { supportsTaskStop: true, supportsStopAll: true } : undefined
   readCommands: NonNullable<StructuredAgentSessionAdapter['readCommands']> = (sessionId) =>
     this.sessions.get(sessionId)?.commands.commands
+  manageMcp: NonNullable<StructuredAgentSessionAdapter['manageMcp']> = (record, operation) =>
+    manageClaudeMcp(this.sessions, record.sessionId, operation)
   readonly atRestCommands: ClaudeStructuredSessionAdapterDeps['atRestCommands']
   holdsDispatch = (sessionId: string): boolean => claudeHoldsDispatch(this.sessions.get(sessionId))
   requiresModelTransitionRestart = claudeOptions.claudeModelTransitionRestart(this.sessions)
@@ -232,12 +232,6 @@ export class ClaudeStructuredSessionAdapter implements StructuredAgentSessionAda
       deps: this.deps,
       emit: (session, event) => this.emit(session, event)
     })
-  noteOptionPick: NonNullable<StructuredAgentSessionAdapter['noteOptionPick']> = (input) => {
-    const session = this.sessions.get(input.sessionId)
-    if (session?.fence === input.fence && input.key === 'model' && input.value) {
-      noteClaudeModelPick(session, input.value)
-    }
-  }
   readOptions = (input: { sessionId: string; fence: number }) =>
     readClaudeStructuredSessionOptions(this.session(input.sessionId))
   releaseAcquisition = (input: ClaudeReleaseRequest): Promise<boolean> => {

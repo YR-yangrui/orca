@@ -23,6 +23,8 @@ export const agentStatusApi = {
     ipcRenderer.on('agentStatus:clear', listener)
     return () => ipcRenderer.removeListener('agentStatus:clear', listener)
   },
+  getCodexRequestPhase: (paneKey: string) =>
+    ipcRenderer.invoke('agentStatus:getCodexRequestPhase', paneKey),
   getSnapshot: (): Promise<AgentStatusIpcPayload[]> =>
     ipcRenderer.invoke('agentStatus:getSnapshot'),
   inferInterrupt: (request: AgentInterruptInferenceRequest): Promise<boolean> =>

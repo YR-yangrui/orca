@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron'
+import { readLocalCodexRequestPhase } from '../../codex/diagnostics/codex-request-phase'
 import type {
   AgentStatusIpcPayload,
   MigrationUnsupportedPtyEntry
@@ -26,6 +27,27 @@ export function registerAgentHookHandlers(
 ): void {
   // Allow safe re-registration independently of the outer module guard.
   ipcMain.removeHandler('agentStatus:getSnapshot')
+  ipcMain.removeHandler('agentStatus:getCodexRequestPhase')
+  ipcMain.handle('agentStatus:getCodexRequestPhase', (_event, paneKey: unknown) => {
+    if (typeof paneKey !== 'string') {
+      return null
+    }
+    const row = agentHookServer.getStatusSnapshot().find((entry) => entry.paneKey === paneKey)
+    // Remote sessions must never be diagnosed using the viewer's local logs.
+    if (
+      !row ||
+      row.connectionId ||
+      row.agentType !== 'codex' ||
+      !row.providerSession?.id ||
+      row.state !== 'working'
+    ) {
+      return null
+    }
+    return readLocalCodexRequestPhase(
+      row.providerSession.id,
+      row.turnStartedAt ?? row.stateStartedAt
+    )
+  })
   ipcMain.removeHandler('agentStatus:inferInterrupt')
   ipcMain.removeHandler('agentStatus:inferQuestionAnswered')
   ipcMain.removeHandler('agentStatus:hasVerifiableAgentProcess')

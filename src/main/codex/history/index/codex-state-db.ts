@@ -37,7 +37,7 @@ export function findNewestCodexStateDbPath(codexHomePath: string): string | null
 
 // Codex's own order: the home's config, then CODEX_SQLITE_HOME, then the home itself. A shared
 // account home keeps its databases in the history store.
-function resolveCodexSqliteHome(codexHomePath: string): string {
+export function resolveCodexSqliteHome(codexHomePath: string): string {
   let config = ''
   try {
     config = readAgentStateFileSync(join(codexHomePath, 'config.toml'))

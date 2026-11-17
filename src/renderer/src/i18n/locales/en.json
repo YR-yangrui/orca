@@ -1,4 +1,25 @@
 {
+  "agentActivity": {
+    "title": "Current session activity",
+    "request": "Request preparation",
+    "headers": "Response headers received",
+    "reasoning": "Reasoning received",
+    "output": "Output received",
+    "tool": "Tool dispatched",
+    "toolComplete": "Tool completed",
+    "retry": "Retry reported",
+    "error": "Request failed",
+    "unconfirmed": "Status unconfirmed",
+    "waiting": "Waiting for input",
+    "done": "Turn ended",
+    "toolName": "Tool: {{name}}",
+    "unknown": "Working · phase unknown",
+    "ago": "{{duration}} ago",
+    "lastEvidence": "Last confirmed activity: {{duration}} ago",
+    "logSource": "Source: this session’s Codex log. This is the last recorded milestone, not a live server state.",
+    "statusSource": "Source: session status events. Detailed request logs are unavailable for this session.",
+    "networkLimit": "Request preparation can be followed by local processing, upload or server wait. These events cannot distinguish upload, TCP retries or server queueing."
+  },
   "agentLaunch": {
     "connectSsh": "Connect to this workspace’s SSH host, then try again.",
     "sshUnavailable": "Terminal launch is unavailable on this SSH host. Open a terminal in the workspace and start the agent there.",

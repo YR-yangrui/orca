@@ -1,3 +1,4 @@
+import type { CodexRequestPhase } from '../../../shared/agent-status/presentation/codex-request-phase'
 import type {
   AgentStatusCacheIdentity,
   AgentStatusClearIpcPayload,
@@ -10,6 +11,7 @@ import type { ComputerAwakeStatus } from '../../../shared/app-lifecycle/computer
 import type { AgentListPublication } from '../../../shared/agent-status/presentation/agent-list-status'
 
 export type AgentStatusApi = {
+  getCodexRequestPhase?: (paneKey: string) => Promise<CodexRequestPhase | null>
   /** Listen for agent status updates forwarded from native hook receivers. */
   onSet: (callback: (data: AgentStatusIpcPayload) => void) => () => void
   /** Listen for main-process cleanup that evicted cached hook status. */

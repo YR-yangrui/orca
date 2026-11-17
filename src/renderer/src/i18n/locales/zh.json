@@ -1,4 +1,25 @@
 {
+  "agentActivity": {
+    "title": "当前会话进度",
+    "request": "请求准备",
+    "headers": "已收到响应头",
+    "reasoning": "已收到推理内容",
+    "output": "已收到输出",
+    "tool": "已派发工具",
+    "toolComplete": "工具已完成",
+    "retry": "已报告重试",
+    "error": "请求失败",
+    "unconfirmed": "状态待确认",
+    "waiting": "等待输入或确认",
+    "done": "本轮已结束",
+    "toolName": "工具：{{name}}",
+    "unknown": "工作中 · 阶段未知",
+    "ago": "距今 {{duration}}",
+    "lastEvidence": "最近确认的活动：{{duration}} 前",
+    "logSource": "来源：当前会话的 Codex 日志。显示最后记录的阶段，不代表服务端此刻的状态。",
+    "statusSource": "来源：会话状态事件。当前会话的详细请求日志不可用。",
+    "networkLimit": "请求准备之后可能处于本地处理、上传或等待服务端。这些事件无法区分上传、TCP 重传和服务端排队。"
+  },
   "agentLaunch": {
     "connectSsh": "连接到此工作区的 SSH 主机，然后重试。",
     "sshUnavailable": "此 SSH 主机无法启动终端会话。请在工作区中打开终端，并在那里启动智能体。",

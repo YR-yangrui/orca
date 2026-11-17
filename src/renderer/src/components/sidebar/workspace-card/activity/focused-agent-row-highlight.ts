@@ -31,7 +31,7 @@ function chatPaneKey(tab: Tab): string {
   return paneKey
 }
 
-function getActivePaneKeyForWorktree(
+export function getActivePaneKeyForWorktree(
   state: FocusedAgentRowHighlightState,
   worktreeId: string
 ): string | null {

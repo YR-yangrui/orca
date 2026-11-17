@@ -41,6 +41,7 @@ import { isOwnerNotSetUpPlaceholder } from './usage/owner-usage-rate-limits'
 import { StatusBarVisibilityMenu } from './composition/StatusBarVisibilityMenu'
 import { isPairedWebClientWindow } from '@/app-shell/chrome/desktop-window-chrome'
 import { GitBlameStatusSegment } from './GitBlameStatusSegment'
+import { AgentActivityStatusSegment } from './agent-activity/AgentActivityStatusSegment'
 
 const PetStatusSegment = lazyWithRetry(() =>
   import('./PetStatusSegment').then((module) => ({ default: module.PetStatusSegment }))
@@ -307,6 +308,9 @@ export function StatusBarSurface({
               </TooltipContent>
             </Tooltip>
           )}
+        </div>
+        <div className="ml-3 flex min-w-0 flex-1 items-center">
+          <AgentActivityStatusSegment />
         </div>
       </div>
 

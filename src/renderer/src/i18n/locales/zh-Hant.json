@@ -1,4 +1,25 @@
 {
+  "agentActivity": {
+    "title": "目前工作階段進度",
+    "request": "請求準備",
+    "headers": "已收到回應標頭",
+    "reasoning": "已收到推理內容",
+    "output": "已收到輸出",
+    "tool": "已派發工具",
+    "toolComplete": "工具已完成",
+    "retry": "已回報重試",
+    "error": "請求失敗",
+    "unconfirmed": "狀態待確認",
+    "waiting": "等待輸入或確認",
+    "done": "本輪已結束",
+    "toolName": "工具：{{name}}",
+    "unknown": "工作中 · 階段未知",
+    "ago": "距今 {{duration}}",
+    "lastEvidence": "最近確認的活動：{{duration}} 前",
+    "logSource": "來源：目前工作階段的 Codex 記錄。顯示最後記錄的階段，不代表伺服器此刻的狀態。",
+    "statusSource": "來源：工作階段狀態事件。目前工作階段的詳細請求記錄無法使用。",
+    "networkLimit": "請求準備之後可能處於本機處理、上傳或等待伺服器。這些事件無法區分上傳、TCP 重傳和伺服器排隊。"
+  },
   "agentLaunch": {
     "connectSsh": "連線至此工作區的 SSH 主機，然後再試一次。",
     "sshUnavailable": "此 SSH 主機無法啟動終端工作階段。請在工作區中開啟終端，並在該處啟動代理程式。",

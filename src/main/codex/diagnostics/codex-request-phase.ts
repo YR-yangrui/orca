@@ -37,16 +37,25 @@ function readPhase(home: string, threadId: string, since: number): CodexRequestP
       INDEXED BY idx_logs_thread_id_ts WHERE thread_id = ? AND ts >= ?
       ORDER BY ts DESC, ts_nanos DESC, id DESC LIMIT 128`)
       .all(threadId, Math.floor(since / 1000))
-    // Only recognized milestones cross IPC; request bodies, headers and credentials stay in the log.
+    const recent: NonNullable<CodexRequestPhase['recent']> = []
+    // Keep short intermediate phases even if the entire response finishes between UI polls.
     for (const row of rows) {
       const observedAt = Number(row.ts) * 1000 + Number(row.ts_nanos) / 1_000_000
       if (observedAt < since) {
         continue
       }
       const phase = codexRequestPhaseFromLog(String(row.target), String(row.feedback_log_body))
-      if (phase) {
-        return { threadId, phase, observedAt }
+      if (phase && recent.at(-1)?.phase !== phase) {
+        recent.push({ phase, observedAt })
+        if (recent.length === 8) {
+          break
+        }
       }
+    }
+    const latest = recent[0]
+    // Only recognized milestones cross IPC; request bodies, headers and credentials stay in the log.
+    if (latest) {
+      return { threadId, ...latest, recent: recent.toReversed() }
     }
   } catch {
     // Missing, locked or newer log schemas leave normal agent status available.

@@ -2,18 +2,19 @@ import { Activity } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { useAgentStatus } from '@/runtime/agent-status/use-agent-status'
 import { useNow } from '@/hooks/use-now'
-import { useTranslate, type Translate } from '@/i18n/use-translate'
+import { useIntlLocale, useTranslate, type Translate } from '@/i18n/use-translate'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { getActivePaneKeyForWorktree } from '../../sidebar/workspace-card/activity/focused-agent-row-highlight'
 import { STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS } from '../composition/status-bar-context-menu-policy'
 import { useCodexRequestPhase } from './use-codex-request-phase'
+import { codexPhaseDescription } from './codex-phase-description'
 import type { CodexRequestPhase } from '../../../../../shared/agent-status/presentation/codex-request-phase'
 import { formatNativeChatDuration } from '../../../../../shared/native-chat/transcript/turns/native-chat-turn-status'
 
 function phaseLabel(phase: CodexRequestPhase['phase'], t: Translate): string {
   switch (phase) {
     case 'request':
-      return t('agentActivity.request', 'Request preparation')
+      return t('agentActivity.request', 'Request in progress · phase unknown')
     case 'headers':
       return t('agentActivity.headers', 'Response headers received')
     case 'reasoning':
@@ -33,6 +34,7 @@ function phaseLabel(phase: CodexRequestPhase['phase'], t: Translate): string {
 
 export function AgentActivityStatusSegment(): React.JSX.Element | null {
   const t = useTranslate()
+  const locale = useIntlLocale()
   const paneKey = useAppStore((state) =>
     state.activeWorktreeId ? getActivePaneKeyForWorktree(state, state.activeWorktreeId) : null
   )
@@ -42,14 +44,15 @@ export function AgentActivityStatusSegment(): React.JSX.Element | null {
   const phase = useCodexRequestPhase(
     paneKey,
     entry?.providerSession?.id,
-    working && entry?.agentType === 'codex'
+    entry?.agentType === 'codex' && !entry.restoredUnconfirmed && !entry.paneSleep,
+    working
   )
   if (!entry) {
     return null
   }
   const turnStart = entry.turnStartedAt ?? entry.stateStartedAt
   // A previous turn's final log can remain in flight when the next turn opens.
-  const currentPhase = working && phase && phase.observedAt >= turnStart ? phase : null
+  const currentPhase = phase && phase.observedAt >= turnStart ? phase : null
   const evidenceAt = entry.evidenceObservedAt ?? entry.updatedAt
   const program = entry.programStatus
   const currentProgram = program && program.observedAt >= entry.stateStartedAt ? program : null
@@ -75,6 +78,33 @@ export function AgentActivityStatusSegment(): React.JSX.Element | null {
   const age = formatNativeChatDuration(Math.max(0, (now - observedAt) / 1000))
   const provider = entry.agentType === 'codex' ? 'Codex' : (entry.agentType ?? 'Agent')
   const title = t('agentActivity.title', 'Current session activity')
+  const explanation =
+    entry.state === 'done'
+      ? t(
+          'agentActivity.doneMeaning',
+          'The session reported that this turn ended. The milestones below remain available even if the response finished between refreshes.'
+        )
+      : entry.paneSleep || entry.restoredUnconfirmed
+        ? t(
+            'agentActivity.unconfirmedMeaning',
+            'This session is asleep or its restored status has not been confirmed. The previous activity is not proof that it is still running.'
+          )
+        : entry.state === 'blocked' || entry.state === 'waiting'
+          ? t(
+              'agentActivity.waitingMeaning',
+              'The session is waiting for input or confirmation. Check the terminal for a question, permission prompt or other blocking message.'
+            )
+          : currentPhase
+            ? codexPhaseDescription(currentPhase.phase, t)
+            : entry.toolName
+              ? t(
+                  'agentActivity.toolMeaning',
+                  'The model issued a tool call and Codex dispatched it. The tool may be running or waiting; this does not confirm completion.'
+                )
+              : t(
+                  'agentActivity.unknownMeaning',
+                  'The session reports work in progress, but there is no detailed request milestone. This does not identify whether the wait is local, network or server-side.'
+                )
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -105,6 +135,7 @@ export function AgentActivityStatusSegment(): React.JSX.Element | null {
         <p>
           {provider} · {label}
         </p>
+        <p>{explanation}</p>
         {working ? (
           <p>
             {t('agentActivity.lastEvidence', 'Last confirmed activity: {{duration}} ago', {
@@ -123,12 +154,32 @@ export function AgentActivityStatusSegment(): React.JSX.Element | null {
                 'Source: session status events. Detailed request logs are unavailable for this session.'
               )}
         </p>
-        <p className="text-muted-foreground">
-          {t(
-            'agentActivity.networkLimit',
-            'Request preparation can be followed by local processing, upload or server wait. These events cannot distinguish upload, TCP retries or server queueing.'
-          )}
-        </p>
+        {currentPhase?.recent?.length ? (
+          <div className="space-y-1 border-t border-border pt-2">
+            <p className="font-medium">{t('agentActivity.recent', 'Recent milestones')}</p>
+            {currentPhase.recent
+              .filter((item) => item.observedAt >= turnStart)
+              .map((item, index) => (
+                <div
+                  key={`${item.observedAt}-${index}`}
+                  className="flex items-start justify-between gap-3 text-muted-foreground"
+                >
+                  <span>
+                    {item.phase === 'request'
+                      ? t('agentActivity.requestStarted', 'Started preparing request')
+                      : phaseLabel(item.phase, t)}
+                  </span>
+                  <span className="shrink-0 tabular-nums">
+                    {new Date(item.observedAt).toLocaleTimeString(locale, {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit'
+                    })}
+                  </span>
+                </div>
+              ))}
+          </div>
+        ) : null}
       </PopoverContent>
     </Popover>
   )

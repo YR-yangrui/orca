@@ -10,6 +10,8 @@ export type CodexRequestPhase = {
     | 'retry'
     | 'error'
   observedAt: number
+  /** Recent distinct milestones, oldest first, retained when a short response ends between polls. */
+  recent?: { phase: CodexRequestPhase['phase']; observedAt: number }[]
 }
 
 /** Logs establish the last observed milestone, not what the server is doing now. */

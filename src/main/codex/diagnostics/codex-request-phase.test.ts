@@ -34,6 +34,27 @@ function log(thread: string, seconds: number, target: string, body: string): voi
 }
 
 describe('Codex request milestone isolation', () => {
+  it('retains response and output milestones when both arrive between status refreshes', () => {
+    log('a', 10, 'codex_core::session::world_state', 'building step world state')
+    log(
+      'a',
+      11,
+      'codex_http_client::client',
+      'Request completed method=POST url=https://example.com/responses status=200 OK'
+    )
+    log('a', 11, 'codex_core::stream_events_utils', 'Output item item_type="message"')
+    expect(readLocalCodexRequestPhase('a', 9000)).toEqual({
+      threadId: 'a',
+      phase: 'output',
+      observedAt: 11000,
+      recent: [
+        { phase: 'request', observedAt: 10000 },
+        { phase: 'headers', observedAt: 11000 },
+        { phase: 'output', observedAt: 11000 }
+      ]
+    })
+  })
+
   it('does not confuse another thread or model catalog response with this request', () => {
     log('a', 10, 'codex_core::session::world_state', 'building step world state')
     log(
@@ -48,7 +69,7 @@ describe('Codex request milestone isolation', () => {
       'codex_http_client::client',
       'Request completed method=POST url=https://example.com/responses status=200 OK'
     )
-    expect(readLocalCodexRequestPhase('a', 9000)).toEqual({
+    expect(readLocalCodexRequestPhase('a', 9000)).toMatchObject({
       threadId: 'a',
       phase: 'request',
       observedAt: 10000
@@ -63,7 +84,7 @@ describe('Codex request milestone isolation', () => {
       'codex_http_client::client',
       'Request completed method=POST url=https://example.com/responses status=503 Service Unavailable'
     )
-    expect(readLocalCodexRequestPhase('a', 0)).toEqual({
+    expect(readLocalCodexRequestPhase('a', 0)).toMatchObject({
       threadId: 'a',
       phase: 'error',
       observedAt: 10000

@@ -1,7 +1,8 @@
 {
   "agentActivity": {
+    "requestStarted": "Started preparing request",
     "title": "Current session activity",
-    "request": "Request preparation",
+    "request": "Request in progress · phase unknown",
     "headers": "Response headers received",
     "reasoning": "Reasoning received",
     "output": "Output received",
@@ -18,7 +19,20 @@
     "lastEvidence": "Last confirmed activity: {{duration}} ago",
     "logSource": "Source: this session’s Codex log. This is the last recorded milestone, not a live server state.",
     "statusSource": "Source: session status events. Detailed request logs are unavailable for this session.",
-    "networkLimit": "Request preparation can be followed by local processing, upload or server wait. These events cannot distinguish upload, TCP retries or server queueing."
+    "networkLimit": "Request preparation can be followed by local processing, upload or server wait. These events cannot distinguish upload, TCP retries or server queueing.",
+    "requestMeaning": "Codex started preparing a model request. No later milestone has been observed yet; it may be preparing locally, uploading, or waiting for the server. This does not mean preparation is still running.",
+    "headersMeaning": "The server returned HTTP response headers. The request has a response, but model text may not have arrived yet.",
+    "reasoningMeaning": "Codex received a reasoning item from the model. This confirms response data arrived; it does not mean the whole response is finished.",
+    "outputMeaning": "Codex received an assistant message item. Text output has arrived; the model may still produce more text or tool calls.",
+    "toolMeaning": "The model issued a tool call and Codex dispatched it. The tool may be running or waiting; this does not confirm completion.",
+    "toolCompleteMeaning": "A tool call finished. Other parallel tools may still be running, or Codex may prepare another model request.",
+    "retryMeaning": "Codex reported a request retry or stream reconnection. This is an application retry, not a measured TCP retransmission.",
+    "errorMeaning": "The model request failed or returned an unsuccessful HTTP status. Codex may retry; this alone does not mean the entire turn failed.",
+    "doneMeaning": "The session reported that this turn ended. The milestones below remain available even if the response finished between refreshes.",
+    "unconfirmedMeaning": "This session is asleep or its restored status has not been confirmed. The previous activity is not proof that it is still running.",
+    "waitingMeaning": "The session is waiting for input or confirmation. Check the terminal for a question, permission prompt or other blocking message.",
+    "unknownMeaning": "The session reports work in progress, but there is no detailed request milestone. This does not identify whether the wait is local, network or server-side.",
+    "recent": "Recent milestones"
   },
   "agentLaunch": {
     "connectSsh": "Connect to this workspace’s SSH host, then try again.",

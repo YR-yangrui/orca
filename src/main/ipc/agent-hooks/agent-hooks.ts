@@ -34,13 +34,7 @@ export function registerAgentHookHandlers(
     }
     const row = agentHookServer.getStatusSnapshot().find((entry) => entry.paneKey === paneKey)
     // Remote sessions must never be diagnosed using the viewer's local logs.
-    if (
-      !row ||
-      row.connectionId ||
-      row.agentType !== 'codex' ||
-      !row.providerSession?.id ||
-      row.state !== 'working'
-    ) {
+    if (!row || row.connectionId || row.agentType !== 'codex' || !row.providerSession?.id) {
       return null
     }
     return readLocalCodexRequestPhase(

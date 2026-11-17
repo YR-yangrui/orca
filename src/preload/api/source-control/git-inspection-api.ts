@@ -1,3 +1,7 @@
+import type {
+  ChangeCategory,
+  ChangeCategoryOperation
+} from '../../../shared/source-control/listing/change-categories'
 import type { GitBlameResult } from '../../../shared/git/blame/git-blame-types'
 import type {
   GitBranchCompareResult,
@@ -24,6 +28,11 @@ import type {
 } from '../../../shared/source-control/ai/generation/commit-message-agent-spec'
 
 export type GitInspectionApi = {
+  changeCategories: (args: {
+    worktreePath: string
+    connectionId?: string
+    operation: ChangeCategoryOperation
+  }) => Promise<ChangeCategory[]>
   status: (args: {
     worktreePath: string
     connectionId?: string

@@ -108,6 +108,7 @@ export const EXECUTION_HOST_METHODS = [
   'git.resolveConflict',
   'git.stage',
   'git.status',
+  'git.changeCategories',
   'git.unstage',
   'git.upstreamStatus',
   // Repo-scoped provider calls run where the desktop runs them: on the repo's host, with its login.

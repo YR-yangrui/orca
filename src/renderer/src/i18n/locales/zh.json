@@ -22796,6 +22796,20 @@
     }
   },
   "sourceControl": {
+    "categories": {
+      "title": "改动分类",
+      "create": "新建分类…",
+      "move": "移动到分类",
+      "uncategorized": "未分类",
+      "remove": "删除分类，保留文件",
+      "name": "分类名称",
+      "duplicate": "此分类已存在",
+      "createAndMove": "创建并移动",
+      "saveFailed": "无法保存改动分类",
+      "empty": "此分类中没有未暂存文件，可切换其他分类查看改动。",
+      "loading": "正在加载共享分类…",
+      "loadFailed": "无法加载共享分类"
+    },
     "sectionAgentStarted": "已在 {{value0}} 中启动",
     "actionSaveFailed": "无法保存此操作。请在设置中重试保存",
     "unlinkedPr": {

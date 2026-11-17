@@ -1,4 +1,7 @@
 import React from 'react'
+import { ChangeCategoryDirectoryMenu } from './change-category-menu'
+import { collectSourceControlTreeFileEntries } from '../../../../../../shared/source-control/listing/source-control-tree'
+import { isCategorizedChange } from './use-change-categories'
 import { ChevronDown, Minus, Plus, Trash, Undo2 } from 'lucide-react'
 import { FolderIcon } from '@/components/FileTypeIcon'
 import { cn } from '@/lib/class-names'
@@ -83,52 +86,61 @@ export function SourceControlTreeDirectoryRow({
   const canDiscard = !hideBulkActions && actionPaths.discardPaths.length > 0
 
   return (
-    <SourceControlTreeDirectoryHeader node={node} isCollapsed={isCollapsed} onToggle={onToggle}>
-      {(canDiscard || canStage || canUnstage) && (
-        <div className={SOURCE_CONTROL_ROW_ACTION_OVERLAY_CLASS}>
-          {canDiscard && (
-            <ActionButton
-              icon={node.area === 'untracked' ? Trash : Undo2}
-              title={
-                node.area === 'untracked'
-                  ? t(
-                      'auto.components.right.sidebar.SourceControl.9b367363b6',
-                      'Delete untracked in folder'
-                    )
-                  : t('auto.components.right.sidebar.SourceControl.6d7f2a47e5', 'Discard folder')
-              }
-              onClick={(event) => {
-                event.stopPropagation()
-                onRequestDiscardPaths(node.area, actionPaths.discardPaths)
-              }}
-              disabled={isExecutingBulk}
-            />
-          )}
-          {canStage && (
-            <ActionButton
-              icon={Plus}
-              title={t('auto.components.right.sidebar.SourceControl.bfe9011a0e', 'Stage folder')}
-              onClick={(event) => {
-                event.stopPropagation()
-                void onStagePaths(actionPaths.stagePaths)
-              }}
-              disabled={isExecutingBulk}
-            />
-          )}
-          {canUnstage && (
-            <ActionButton
-              icon={Minus}
-              title={t('auto.components.right.sidebar.SourceControl.ab31221779', 'Unstage folder')}
-              onClick={(event) => {
-                event.stopPropagation()
-                void onUnstagePaths(actionPaths.unstagePaths)
-              }}
-              disabled={isExecutingBulk}
-            />
-          )}
-        </div>
-      )}
-    </SourceControlTreeDirectoryHeader>
+    <ChangeCategoryDirectoryMenu
+      paths={collectSourceControlTreeFileEntries(node)
+        .filter(isCategorizedChange)
+        .map((entry) => entry.path)}
+    >
+      <SourceControlTreeDirectoryHeader node={node} isCollapsed={isCollapsed} onToggle={onToggle}>
+        {(canDiscard || canStage || canUnstage) && (
+          <div className={SOURCE_CONTROL_ROW_ACTION_OVERLAY_CLASS}>
+            {canDiscard && (
+              <ActionButton
+                icon={node.area === 'untracked' ? Trash : Undo2}
+                title={
+                  node.area === 'untracked'
+                    ? t(
+                        'auto.components.right.sidebar.SourceControl.9b367363b6',
+                        'Delete untracked in folder'
+                      )
+                    : t('auto.components.right.sidebar.SourceControl.6d7f2a47e5', 'Discard folder')
+                }
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onRequestDiscardPaths(node.area, actionPaths.discardPaths)
+                }}
+                disabled={isExecutingBulk}
+              />
+            )}
+            {canStage && (
+              <ActionButton
+                icon={Plus}
+                title={t('auto.components.right.sidebar.SourceControl.bfe9011a0e', 'Stage folder')}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  void onStagePaths(actionPaths.stagePaths)
+                }}
+                disabled={isExecutingBulk}
+              />
+            )}
+            {canUnstage && (
+              <ActionButton
+                icon={Minus}
+                title={t(
+                  'auto.components.right.sidebar.SourceControl.ab31221779',
+                  'Unstage folder'
+                )}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  void onUnstagePaths(actionPaths.unstagePaths)
+                }}
+                disabled={isExecutingBulk}
+              />
+            )}
+          </div>
+        )}
+      </SourceControlTreeDirectoryHeader>
+    </ChangeCategoryDirectoryMenu>
   )
 }
 

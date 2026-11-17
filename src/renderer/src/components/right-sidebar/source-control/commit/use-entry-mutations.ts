@@ -33,11 +33,13 @@ export function useSourceControlEntryMutations({
   activeRepoTarget,
   activeWorktreeId,
   worktreePath,
+  onPathsRemoved,
   refreshActiveGitStatusAfterMutation
 }: {
   activeRepoTarget: RuntimeClientTarget | null
   activeWorktreeId: string | null
   worktreePath: string | null
+  onPathsRemoved?: (paths: readonly string[]) => void
   refreshActiveGitStatusAfterMutation: () => Promise<void>
 }) {
   // Name the callback so Retry can reenter the same attempt.
@@ -78,11 +80,21 @@ export function useSourceControlEntryMutations({
         return
       }
       // Clear only this worktree's failure slot; another worktree may have filled it while this attempt ran.
+      if (operation === 'stage') {
+        onPathsRemoved?.([filePath])
+      }
       dismissSourceControlEntryFailureToast(activeWorktreeId)
       // Refresh outside the mutation catch so its errors cannot be mislabeled as stage failures.
       await refreshActiveGitStatusAfterMutation()
     },
-    [activeRepoTarget, worktreePath, activeWorktreeId, refreshActiveGitStatusAfterMutation, scope]
+    [
+      activeRepoTarget,
+      worktreePath,
+      activeWorktreeId,
+      refreshActiveGitStatusAfterMutation,
+      scope,
+      onPathsRemoved
+    ]
   )
 
   const handleStage = useCallback(
@@ -182,6 +194,7 @@ export function useSourceControlEntryMutations({
           },
           filePath
         )
+        onPathsRemoved?.([filePath])
         notifyEditorExternalFileChange({
           worktreeId: activeWorktreeId,
           worktreePath,
@@ -192,7 +205,7 @@ export function useSourceControlEntryMutations({
         releaseAutoSave()
       }
     },
-    [activeRepoTarget, activeWorktreeId, scope, worktreePath]
+    [activeRepoTarget, activeWorktreeId, scope, worktreePath, onPathsRemoved]
   )
 
   const discardMany = useCallback(
@@ -236,6 +249,8 @@ export function useSourceControlEntryMutations({
           },
           filePaths
         )
+        onPathsRemoved?.(filePaths)
+        // Refresh every affected editor after the successful bulk discard.
         for (const relativePath of filePaths) {
           notifyEditorExternalFileChange({
             worktreeId: activeWorktreeId,
@@ -250,7 +265,7 @@ export function useSourceControlEntryMutations({
         }
       }
     },
-    [activeRepoTarget, activeWorktreeId, scope, worktreePath]
+    [activeRepoTarget, activeWorktreeId, scope, worktreePath, onPathsRemoved]
   )
 
   return {

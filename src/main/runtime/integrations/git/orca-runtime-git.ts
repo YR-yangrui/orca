@@ -6,6 +6,7 @@ import { RuntimeGitSyncCommands } from './runtime-git-sync-commands'
 import type { RuntimeGitCommandHost } from './runtime-git-command-target'
 
 export class RuntimeGitCommands {
+  readonly changeRuntimeGitCategories: RuntimeGitStatusCommands['changeRuntimeGitCategories']
   readonly getRuntimeGitStatus: RuntimeGitStatusCommands['getRuntimeGitStatus']
   readonly getRuntimeGitSubmoduleStatus: RuntimeGitStatusCommands['getRuntimeGitSubmoduleStatus']
   readonly checkRuntimeGitIgnoredPaths: RuntimeGitStatusCommands['checkRuntimeGitIgnoredPaths']
@@ -61,6 +62,7 @@ export class RuntimeGitCommands {
     const generation = new RuntimeGitGenerationCommands(host)
     const staging = new RuntimeGitStagingCommands(host)
 
+    this.changeRuntimeGitCategories = status.changeRuntimeGitCategories.bind(status)
     this.getRuntimeGitStatus = status.getRuntimeGitStatus.bind(status)
     this.getRuntimeGitSubmoduleStatus = status.getRuntimeGitSubmoduleStatus.bind(status)
     this.checkRuntimeGitIgnoredPaths = status.checkRuntimeGitIgnoredPaths.bind(status)

@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron'
+import { registerChangeCategoryHandlers } from './filesystem-change-category-handlers'
 import type {
   GitConflictOperation,
   GitStagingArea,
@@ -45,6 +46,7 @@ import {
 } from '../../../wsl/filesystem/wsl-unc-access-gate'
 
 export function registerFilesystemGitStatusHandlers(context: FilesystemHandlerContext): void {
+  registerChangeCategoryHandlers(context)
   const { store, gitStatusCancellations } = context
   registerFilesystemGitHistoryHandlers(context)
   registerFilesystemGitAtRiskLocalFilesHandlers(context)

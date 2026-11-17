@@ -52,6 +52,7 @@ export function useSourceControlPanelFoundation() {
   } = panelState
 
   const listing = useSourceControlFileListing({
+    activeConnectionId,
     activeRemoteActionSequence,
     activeRepoTarget,
     activeWorktreeId,

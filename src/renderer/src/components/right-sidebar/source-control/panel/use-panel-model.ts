@@ -77,7 +77,7 @@ export function useSourceControlPanelModel() {
   const { handleCreatePullRequest, prGenerating } = reviewFlows
 
   const actionModel = useSourceControlActionModel({
-    grouped,
+    grouped: foundation.categoryActionGroups,
     commitMessage,
     unresolvedConflictCount: unresolvedConflicts.length,
     isCommitting,
@@ -158,6 +158,7 @@ export function useSourceControlPanelModel() {
     sourceControlRef
   })
   const entryMutations = useSourceControlEntryMutations({
+    onPathsRemoved: foundation.changeCategories.forgetPaths,
     activeRepoTarget,
     activeWorktreeId,
     worktreePath,

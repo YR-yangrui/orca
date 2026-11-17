@@ -23290,6 +23290,20 @@
     }
   },
   "sourceControl": {
+    "categories": {
+      "title": "Change categories",
+      "create": "New category…",
+      "move": "Move to category",
+      "uncategorized": "Uncategorized",
+      "remove": "Remove category; keep files",
+      "name": "Category name",
+      "duplicate": "This category already exists",
+      "createAndMove": "Create and move",
+      "saveFailed": "Could not save change categories",
+      "empty": "No unstaged files in this category. Select another category to view its changes.",
+      "loading": "Loading shared categories…",
+      "loadFailed": "Could not load shared categories"
+    },
     "sectionAgentStarted": "Started in {{value0}}",
     "actionSaveFailed": "Could not save this action. Try saving it again in Settings.",
     "discard": {

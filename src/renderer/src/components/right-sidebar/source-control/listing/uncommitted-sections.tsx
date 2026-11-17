@@ -1,4 +1,5 @@
 import React from 'react'
+import { useChangeCategoryContext } from './change-category-context'
 import { Minus, Plus, Undo2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTranslate } from '@/i18n/use-translate'
@@ -90,6 +91,7 @@ export function SourceControlUncommittedSections(props: {
   requestDiscardEntry: (entry: GitStatusEntry) => void
   diffCommentCountByPath: Map<string, number>
 }): React.JSX.Element {
+  const categoryContext = useChangeCategoryContext()
   const embedded = useSourceControlScope() !== null
   const t = useTranslate()
   return (
@@ -97,15 +99,20 @@ export function SourceControlUncommittedSections(props: {
       {props.displaySections.map((section) => {
         const { area, id, items } = section
         const isCollapsed = props.collapsedSections.has(id)
-        // Bulk actions use unfiltered groups; hide them while filtering and share execution eligibility to avoid empty actions.
-        const actionSection = props.unfilteredDisplaySectionsById.get(id) ?? section
+        // Category actions use visible paths; other sections retain their existing whole-section semantics.
+        const categoryScoped =
+          id === 'unstaged' && (categoryContext?.model.categories.length ?? 0) > 0
+        const actionSection = categoryScoped
+          ? section
+          : (props.unfilteredDisplaySectionsById.get(id) ?? section)
         const actionItems = actionSection.items
         const stageAllPaths = actionItems.filter(isStageableStatusEntry).map((entry) => entry.path)
         const unstageAllPaths = getUnstageAllPaths(actionItems)
         const discardAllPaths = getDiscardAllPaths(actionItems, area)
-        const canStageAll = !props.normalizedFilter && stageAllPaths.length > 0
+        const canStageAll = (categoryScoped || !props.normalizedFilter) && stageAllPaths.length > 0
         const canUnstageAll = !props.normalizedFilter && unstageAllPaths.length > 0
-        const canRevertAll = !props.normalizedFilter && discardAllPaths.length > 0
+        const canRevertAll =
+          (categoryScoped || !props.normalizedFilter) && discardAllPaths.length > 0
         const sectionLabel = id === 'conflicts' ? CONFLICTS_SECTION_LABEL : SECTION_LABELS[area]
         const sectionViewAction = getSourceControlSectionViewAction(actionSection)
         return (

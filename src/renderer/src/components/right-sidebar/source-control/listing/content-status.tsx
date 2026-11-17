@@ -51,7 +51,7 @@ export function SourceControlContentStatus({
   statusReadError?: string
   worktreeId: string
   onRetryStatus: (signal: AbortSignal) => Promise<void>
-  onStageAllChanges: () => Promise<void>
+  onStageAllChanges?: () => Promise<void>
   isExecutingBulk: boolean
   showGenericEmptyState: boolean
   normalizedFilter: string

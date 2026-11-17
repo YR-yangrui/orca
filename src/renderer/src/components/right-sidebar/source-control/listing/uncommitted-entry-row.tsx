@@ -99,6 +99,7 @@ export const UncommittedEntryRow = React.memo(function UncommittedEntryRow({
 
   return (
     <SourceControlEntryContextMenu
+      categoryEntry={entry}
       currentWorktreeId={currentWorktreeId}
       absolutePath={joinPath(worktreePath, entry.path)}
       relativePath={entry.path}

@@ -75,6 +75,7 @@ const EMPTY_BRANCH_TREE_NODES: readonly SourceControlTreeNode<GitBranchChangeEnt
 
 export function useSourceControlFileProjection({
   entries,
+  categoryEntries = entries,
   branchEntries,
   filterQuery,
   sourceControlGroupOrder,
@@ -88,6 +89,7 @@ export function useSourceControlFileProjection({
   collapsedSections
 }: {
   entries: GitStatusEntry[]
+  categoryEntries?: GitStatusEntry[]
   branchEntries: GitBranchChangeEntry[]
   filterQuery: string
   sourceControlGroupOrder: readonly SourceControlDisplaySectionArea[]
@@ -111,8 +113,12 @@ export function useSourceControlFileProjection({
     Boolean(activeWorktreeId && worktreePath && !isFolder)
 
   const unfilteredDisplaySections = useMemo(
-    () => buildSourceControlDisplaySections(grouped, sourceControlGroupOrder),
-    [grouped, sourceControlGroupOrder]
+    () =>
+      buildSourceControlDisplaySections(
+        groupSourceControlEntries(categoryEntries),
+        sourceControlGroupOrder
+      ),
+    [categoryEntries, sourceControlGroupOrder]
   )
   const displaySections = useMemo(
     () =>

@@ -1,3 +1,5 @@
+import { changeWorktreeCategories } from '../../../git/source-control/change-categories'
+import type { ChangeCategoryOperation } from '../../../../shared/source-control/listing/change-categories'
 import type {
   GitHistoryOptions,
   GitHistoryResult
@@ -42,6 +44,16 @@ async function resolveGatedGitTarget(
 }
 
 export class RuntimeGitStatusCommands {
+  async changeRuntimeGitCategories(worktreeSelector: string, operation: ChangeCategoryOperation) {
+    const target = await resolveGatedGitTarget(this.host, worktreeSelector)
+    requireLocalRuntimeGitRoute(target)
+    return changeWorktreeCategories(
+      target.worktree.path,
+      operation,
+      localGitOptionsForTarget(target)
+    )
+  }
+
   constructor(private readonly host: RuntimeGitCommandHost) {}
 
   async getRuntimeGitStatus(

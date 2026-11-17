@@ -1,3 +1,4 @@
+import { ChangeCategoryProvider } from '../listing/change-category-context'
 import { SourceControlBranchPicker } from '../branches/SourceControlBranchPicker'
 import { BulkActionBar } from '../commit/bulk-action-bar'
 import { SourceControlHeaderToolbar } from './header-toolbar'
@@ -56,7 +57,14 @@ export function SourceControlPanelReady(props: SourceControlPanelReadyProps) {
   } = model
 
   return (
-    <>
+    <ChangeCategoryProvider
+      key={model.changeCategories.scope}
+      model={model.changeCategories}
+      entries={model.entries}
+      selectedKeys={model.selectedKeys}
+      flatEntriesByKey={model.flatEntriesByKey}
+      disabled={model.isExecutingBulk || model.isCommitting}
+    >
       <div
         ref={setSourceControlRoot}
         className={
@@ -139,6 +147,6 @@ export function SourceControlPanelReady(props: SourceControlPanelReadyProps) {
       </div>
 
       <SourceControlPanelDialogs {...props} />
-    </>
+    </ChangeCategoryProvider>
   )
 }

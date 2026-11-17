@@ -20912,6 +20912,20 @@
     }
   },
   "sourceControl": {
+    "categories": {
+      "title": "變更分類",
+      "create": "新增分類…",
+      "move": "移至分類",
+      "uncategorized": "未分類",
+      "remove": "刪除分類，保留檔案",
+      "name": "分類名稱",
+      "duplicate": "此分類已存在",
+      "createAndMove": "建立並移動",
+      "saveFailed": "無法儲存變更分類",
+      "empty": "此分類中沒有未暫存檔案，可切換其他分類查看變更。",
+      "loading": "正在載入共用分類…",
+      "loadFailed": "無法載入共用分類"
+    },
     "sectionAgentStarted": "已在 {{value0}} 中啟動",
     "actionSaveFailed": "無法儲存此動作。請在「設定」中再試著儲存。",
     "discard": {

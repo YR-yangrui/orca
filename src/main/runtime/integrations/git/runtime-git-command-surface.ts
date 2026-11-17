@@ -1,6 +1,7 @@
 import type { RuntimeGitCommands } from './orca-runtime-git'
 
 type RuntimeGitCommandName =
+  | 'changeRuntimeGitCategories'
   | 'getRuntimeGitStatus'
   | 'getRuntimeGitSubmoduleStatus'
   | 'checkRuntimeGitIgnoredPaths'
@@ -56,6 +57,7 @@ export function installRuntimeGitCommandSurface(
   commands: RuntimeGitCommands
 ): void {
   Object.assign(target, {
+    changeRuntimeGitCategories: commands.changeRuntimeGitCategories.bind(commands),
     getRuntimeGitStatus: commands.getRuntimeGitStatus.bind(commands),
     getRuntimeGitSubmoduleStatus: commands.getRuntimeGitSubmoduleStatus.bind(commands),
     checkRuntimeGitIgnoredPaths: commands.checkRuntimeGitIgnoredPaths.bind(commands),

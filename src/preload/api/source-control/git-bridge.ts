@@ -1,3 +1,7 @@
+import type {
+  ChangeCategory,
+  ChangeCategoryOperation
+} from '../../../shared/source-control/listing/change-categories'
 import type { GitBlameResult } from '../../../shared/git/blame/git-blame-types'
 import type {
   GitCommitAction,
@@ -21,6 +25,11 @@ import type {
 import type { PreloadApi } from '../../api-types'
 
 export const gitApi = {
+  changeCategories: (args: {
+    worktreePath: string
+    connectionId?: string
+    operation: ChangeCategoryOperation
+  }): Promise<ChangeCategory[]> => ipcRenderer.invoke('git:changeCategories', args),
   status: (args: {
     worktreePath: string
     connectionId?: string

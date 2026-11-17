@@ -41,6 +41,7 @@ export function useSourceControlBulkActions({
   activeWorktreeId,
   worktreePath,
   grouped,
+  onPathsStaged,
   isStatusTruncated,
   clearSelection,
   refreshActiveGitStatusAfterMutation
@@ -51,6 +52,7 @@ export function useSourceControlBulkActions({
   activeWorktreeId: string | null
   worktreePath: string | null
   grouped: SourceControlEntryGroups
+  onPathsStaged?: (paths: readonly string[]) => void
   /** The status read hit its entry cap, so `grouped` holds only the first rows. */
   isStatusTruncated: boolean
   clearSelection: () => void
@@ -104,6 +106,7 @@ export function useSourceControlBulkActions({
         },
         bulkStagePaths
       )
+      onPathsStaged?.(bulkStagePaths)
       await refreshActiveGitStatusAfterMutation()
       clearSelection()
     } catch (error) {
@@ -115,6 +118,7 @@ export function useSourceControlBulkActions({
     activeRepoTarget,
     worktreePath,
     bulkStagePaths,
+    onPathsStaged,
     clearSelection,
     activeWorktreeId,
     isExecutingBulk,
@@ -175,6 +179,7 @@ export function useSourceControlBulkActions({
         await (scope
           ? stageRuntimeGitWorktreeScope(context, scope)
           : bulkStageRuntimeGitPaths(context, [...paths]))
+        onPathsStaged?.(paths)
         await refreshActiveGitStatusAfterMutation()
         clearSelection()
       } catch (error) {
@@ -185,6 +190,7 @@ export function useSourceControlBulkActions({
     },
     [
       sourceControlScope,
+      onPathsStaged,
       activeRepoTarget,
       activeWorktreeId,
       clearSelection,

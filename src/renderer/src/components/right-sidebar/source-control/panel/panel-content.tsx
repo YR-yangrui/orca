@@ -1,3 +1,4 @@
+import { ChangeCategoryTabs } from '../listing/change-category-tabs'
 import { useGitCommitActionsSupport } from '@/runtime/source-control/git/git-commit-actions-capability'
 import { GitHistoryPanel } from '../sync/git-history-panel'
 import { shouldShowSourceControlCompareUnavailableCard } from './header-toolbar'
@@ -121,7 +122,11 @@ export function SourceControlPanelContent(props: SourceControlPanelReadyProps) {
         statusReadError={statusReadError}
         worktreeId={currentWorktreeId}
         onRetryStatus={refreshActiveGitStatus}
-        onStageAllChanges={handleStageWorktreeChanges}
+        onStageAllChanges={
+          model.changeCategories.categories.length || normalizedFilter
+            ? undefined
+            : handleStageWorktreeChanges
+        }
         isExecutingBulk={isExecutingBulk}
         showGenericEmptyState={showGenericEmptyState}
         normalizedFilter={normalizedFilter}
@@ -140,6 +145,8 @@ export function SourceControlPanelContent(props: SourceControlPanelReadyProps) {
         conflictOperation,
         recovery.supported
       ) && <SourceControlCommitSurface {...props} showGenericEmptyState={showGenericEmptyState} />}
+
+      <ChangeCategoryTabs />
 
       {hasFilteredUncommittedEntries && (
         <SourceControlUncommittedSections

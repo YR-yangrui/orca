@@ -1,3 +1,6 @@
+import type { GitStatusEntry } from '../../../../../../shared/git/status/git-status-types'
+import { ChangeCategoryMenuItems } from './change-category-menu'
+import { isCategorizedChange } from './use-change-categories'
 import { useSourceControlScope, useSourceControlState } from '../panel/worktree-scope'
 import React, { useCallback } from 'react'
 import { Copy, ExternalLink, Eye, FolderOpen } from 'lucide-react'
@@ -24,6 +27,7 @@ import { OpenInContextSubmenu } from '@/components/file-actions/OpenInContextSub
 
 type SourceControlEntryContextMenuProps = {
   currentWorktreeId: string
+  categoryEntry?: GitStatusEntry
   absolutePath?: string
   relativePath?: string
   /** False for a deleted entry: there is no file for the OS file manager to show. */
@@ -39,6 +43,7 @@ type SourceControlEntryContextMenuProps = {
 
 export function SourceControlEntryContextMenu({
   currentWorktreeId,
+  categoryEntry,
   absolutePath,
   relativePath,
   hasWorkingTreeFile,
@@ -96,6 +101,9 @@ export function SourceControlEntryContextMenu({
     <ContextMenu onOpenChange={onOpenChange}>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent className="w-52">
+        {categoryEntry && isCategorizedChange(categoryEntry) && (
+          <ChangeCategoryMenuItems paths={[categoryEntry.path]} useSelection />
+        )}
         <ContextMenuItem onSelect={onView} disabled={!onView}>
           <Eye className="size-3.5" />
           {t('auto.components.right.sidebar.SourceControlEntryContextMenu.a1f2c8d901', 'View')}

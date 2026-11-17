@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo } from 'react'
 import { deriveSourceControlPushRecovery } from '../sync/push-recovery'
 import { isSourceControlSplitOpenModifier, type SourceControlRowOpenEvent } from './split-open'
+import { useChangeCategories } from './use-change-categories'
+import { groupSourceControlEntries } from '../../../../../../shared/source-control/listing/source-control-section-order'
 import { useSourceControlSelection } from './use-selection'
 import { useSourceControlSubmoduleStatus } from './use-submodule-status'
 import type { SourceControlActionError } from '../sync/action-error'
@@ -13,6 +15,7 @@ import { useSourceControlRowOpening } from './use-row-opening'
 import type { SourceControlWorktreeContext } from './use-worktree-context'
 
 export function useSourceControlFileListing({
+  activeConnectionId,
   activeRemoteActionSequence,
   activeRepoTarget,
   activeWorktreeId,
@@ -38,6 +41,7 @@ export function useSourceControlFileListing({
   worktreeMap,
   worktreePath
 }: {
+  activeConnectionId: string | null
   activeRemoteActionSequence: number | null
   activeRepoTarget: SourceControlWorktreeContext['activeRepoTarget']
   activeWorktreeId: string | null
@@ -63,6 +67,13 @@ export function useSourceControlFileListing({
   worktreeMap: SourceControlWorktreeContext['worktreeMap']
   worktreePath: string | null
 }) {
+  const changeCategories = useChangeCategories({
+    target: activeRepoTarget,
+    connectionId: activeConnectionId,
+    worktreePath,
+    worktreeId: activeWorktreeId,
+    entries
+  })
   const { expandedSubmoduleKeys, submoduleStatusByKey, toggleSubmodule } =
     useSourceControlSubmoduleStatus({
       activeWorktreeId,
@@ -84,6 +95,7 @@ export function useSourceControlFileListing({
     visibleSelectionEntries
   } = useSourceControlFileProjection({
     entries,
+    categoryEntries: changeCategories.categoryEntries,
     branchEntries,
     filterQuery,
     sourceControlGroupOrder,
@@ -153,6 +165,12 @@ export function useSourceControlFileListing({
     () => new Map(visibleSelectionEntries.map((entry) => [entry.key, entry])),
     [visibleSelectionEntries]
   )
+  // Primary staging follows the same category and text filter as the visible changes.
+  const actionGroups = useMemo(
+    () => groupSourceControlEntries(displaySections.flatMap((section) => section.items)),
+    [displaySections]
+  )
+  const scopedChanges = changeCategories.categories.length > 0 || Boolean(normalizedFilter)
   const {
     isExecutingBulk,
     setIsExecutingBulk,
@@ -172,8 +190,9 @@ export function useSourceControlFileListing({
     activeRepoTarget,
     activeWorktreeId,
     worktreePath,
-    grouped,
-    isStatusTruncated: repositoryHuge !== undefined,
+    grouped: actionGroups,
+    onPathsStaged: changeCategories.forgetPaths,
+    isStatusTruncated: repositoryHuge !== undefined && !scopedChanges,
     clearSelection,
     refreshActiveGitStatusAfterMutation
   })
@@ -200,6 +219,12 @@ export function useSourceControlFileListing({
   )
 
   return {
+    changeCategories,
+    categoryActionGroups: {
+      ...grouped,
+      unstaged: actionGroups.unstaged,
+      untracked: actionGroups.untracked
+    },
     activeOpenRowKeys,
     bulkStagePaths,
     bulkUnstagePaths,
@@ -219,7 +244,7 @@ export function useSourceControlFileListing({
     handleStageAllPaths,
     handleStageAllPrimary,
     handleStageSectionPaths,
-    handleStageWorktreeChanges,
+    handleStageWorktreeChanges: scopedChanges ? handleStageAllPrimary : handleStageWorktreeChanges,
     handleUnstagePaths,
     isExecutingBulk,
     isGitHistoryVisible,

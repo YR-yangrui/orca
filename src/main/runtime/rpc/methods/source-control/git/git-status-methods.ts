@@ -1,6 +1,7 @@
 import { GIT_REVERT_CONFLICT_CLIENT_CAPABILITY } from '../../../../../../shared/git/commands/git-commit-action'
 import type { GitConflictOperation } from '../../../../../../shared/git/status/git-status-types'
 import {
+  GitChangeCategories,
   GitStatusParams,
   GitSubmoduleStatus,
   WorktreeSelector
@@ -17,6 +18,13 @@ function projectConflictOperation(
 }
 
 export const GIT_STATUS_METHODS = [
+  defineMethod({
+    name: 'git.changeCategories',
+    permission: 'workspace',
+    params: GitChangeCategories,
+    handler: (params, { runtime }) =>
+      runtime.changeRuntimeGitCategories(params.worktree, params.operation)
+  }),
   defineMethod({
     name: 'git.submoduleStatus',
     permission: 'workspace',

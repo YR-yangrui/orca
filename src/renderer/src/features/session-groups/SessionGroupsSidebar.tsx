@@ -18,8 +18,8 @@ import {
   selectFolderWorkspaces,
   selectWorktreesByRepo
 } from '@/store/workspaces/catalog/workspace-record-fields'
-import { getRepoExecutionHostId } from '../../../../shared/execution-host'
-import { getActiveSidebarWorkspaceId } from '../../../../shared/workspace-scope'
+import { getRepoExecutionHostId } from '../../../../shared/execution-host/execution-host'
+import { getActiveSidebarWorkspaceId } from '../../../../shared/workspace/identity/workspace-scope'
 import { createSessionGroup } from './session-group-actions'
 import { SessionGroupCard } from './SessionGroupCard'
 import {

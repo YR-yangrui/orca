@@ -1,8 +1,8 @@
 import type { AttachedWorktreeResolution } from '@/components/right-sidebar/folder-workspace-attached-worktrees'
-import type { Repo } from '../../../../shared/repo-types'
+import type { Repo } from '../../../../shared/repository/repo-types'
 import type { Worktree } from '../../../../shared/worktree/types'
-import { normalizeRuntimePathForComparison } from '../../../../shared/cross-platform-path'
-import { getRepoExecutionHostId } from '../../../../shared/execution-host'
+import { normalizeRuntimePathForComparison } from '../../../../shared/file-access/cross-platform-path'
+import { getRepoExecutionHostId } from '../../../../shared/execution-host/execution-host'
 import { sessionGroupProjects } from './session-group-state'
 
 export function isSessionGroupResolution(resolution: AttachedWorktreeResolution): boolean {

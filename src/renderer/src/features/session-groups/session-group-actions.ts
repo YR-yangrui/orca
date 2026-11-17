@@ -1,12 +1,12 @@
 import { useAppStore } from '@/store'
 import { activateAndRevealFolderWorkspace } from '@/lib/workspace/activation/worktree-activation'
 import { launchAgentInNewTabWithOutcome } from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab'
-import { newAgentLaunchRequestId } from '@/lib/agent-session/launch/routing/agent-launch-request-id'
+import { createNonSecureContextUuid } from '../../../../shared/identifiers/non-secure-context-uuid'
 import { isTuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent-config'
-import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
-import { getRepoExecutionHostId } from '../../../../shared/execution-host'
-import { normalizeRuntimePathForComparison } from '../../../../shared/cross-platform-path'
-import type { Repo } from '../../../../shared/repo-types'
+import { folderWorkspaceKey } from '../../../../shared/workspace/identity/workspace-scope'
+import { getRepoExecutionHostId } from '../../../../shared/execution-host/execution-host'
+import { normalizeRuntimePathForComparison } from '../../../../shared/file-access/cross-platform-path'
+import type { Repo } from '../../../../shared/repository/repo-types'
 import { registerSessionGroupProject, sessionGroupProjects } from './session-group-state'
 
 const pendingGroups = new Map<string, Promise<string>>()
@@ -70,7 +70,7 @@ export async function createSessionGroup(repo: Repo, name: string): Promise<void
   })
   if (agent) {
     launchAgentInNewTabWithOutcome({
-      requestId: newAgentLaunchRequestId(),
+      requestId: createNonSecureContextUuid(),
       agent,
       worktreeId: folderWorkspaceKey(workspace.id),
       workspaceExecutionHostId: 'local',
